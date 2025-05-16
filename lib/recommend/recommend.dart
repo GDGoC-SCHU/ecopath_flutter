@@ -1,19 +1,20 @@
 import 'package:eco_path/data/string.dart';
+import 'package:eco_path/home/click_to_city.dart';
 import 'package:flutter/material.dart';
 
-import 'recommand_page.dart';
-import 'recommand_path.dart';
+import 'recommend_page.dart';
+import 'recommend_path.dart';
 
-class RecommandPage extends StatefulWidget {
+class RecommendPage extends StatefulWidget {
   final String city;
 
-  const RecommandPage({super.key, required this.city});
+  const RecommendPage({super.key, required this.city});
 
   @override
-  State<RecommandPage> createState() => _RecommandState();
+  State<RecommendPage> createState() => _RecommandState();
 }
 
-class _RecommandState extends State<RecommandPage> {
+class _RecommandState extends State<RecommendPage> {
   int _selectedIndex = 0;
 
   /// 추천 경로 페이지는 이 파일에서, 나머지는 따로 불러오기
@@ -34,23 +35,24 @@ class _RecommandState extends State<RecommandPage> {
     if (placesList != null) {
       List<Map<String, String>>? checkedList = placesList;
       bool flag = false;
-      List<int>? indexs = [];
+      Map<String, String> indexes = {};
       for (int i = 0; i < places.length; i++) {
         for (int j = 0; j < placesList.length; j++) {
           if (places[i][NAME] == placesList[j][NAME] &&
               places[i][CATEGORY] == placesList[j][CATEGORY]) {
             flag = true;
-            indexs.add(j);
-            break;
+            indexes.addAll(placesList[j]);
           }
         }
       }
-      if (flag) {
-        for (var i in indexs) {
-          checkedList.removeAt(i);
+      setState(() {
+        if (flag) {
+          places.removeWhere((i) => checkedList.any((target) =>
+              i[NAME] == target[NAME] && i[CATEGORY] == target[CATEGORY]));
+        } else {
+          places.addAll(checkedList);
         }
-      }
-      setState(() => places.addAll(checkedList));
+      });
     }
 
     /// 장소 하나만 들어왔을 때
@@ -82,23 +84,27 @@ class _RecommandState extends State<RecommandPage> {
   void initState() {
     super.initState();
     _pages = [
-      RecommandPathPage(
+      RecommendPathPage(
         onClickCard: onClickPlace,
       ),
-      RecommandWidget(
-        category: "식당",
+      RecommendWidget(
+        key: UniqueKey(),
+        category: CATEGORYLIST[1],
         onClickCard: onClickPlace,
       ),
-      RecommandWidget(
-        category: "관광지",
+      RecommendWidget(
+        key: UniqueKey(),
+        category: CATEGORYLIST[3],
         onClickCard: onClickPlace,
       ),
-      RecommandWidget(
-        category: "카페",
+      RecommendWidget(
+        key: UniqueKey(),
+        category: CATEGORYLIST[2],
         onClickCard: onClickPlace,
       ),
-      RecommandWidget(
-        category: "숙소",
+      RecommendWidget(
+        key: UniqueKey(),
+        category: CATEGORYLIST[0],
         onClickCard: onClickPlace,
       )
     ];
@@ -239,7 +245,12 @@ class _RecommandState extends State<RecommandPage> {
                                       "검색 결과가 없습니다.",
                                       style: TextStyle(color: Colors.grey),
                                     ))
-                                  : _pages[_selectedIndex])
+                                  : _pages[_selectedIndex]),
+                          ElevatedButton(
+                            onPressed: () => clickToMap(context, places),
+                            child: const Text("확인",
+                                style: TextStyle(color: Colors.blue)),
+                          )
                         ]))))
           ],
         ),

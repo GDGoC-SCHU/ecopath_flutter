@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
           return const Column(
             children: [
               HomePageHeader(),
-              Expanded(child: HomePageBody()), // ✅ 핵심: 여기서 확실한 제약 부여
+              Expanded(child: HomePageBody()),
             ],
           );
         },
